@@ -1,0 +1,8 @@
+---
+applications:
+- name: swd
+  memory: 256M
+  instances: 1
+  host: rest-service
+  domain: guides.spring.io
+  path: build/libs/swd-0.0.1.jar
