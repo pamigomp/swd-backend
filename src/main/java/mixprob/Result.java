@@ -1,6 +1,6 @@
 package mixprob;
 
-public class Results {
+public class Result {
 	private double amountBread;
 	private double amountMilk;
 	private double amountChicken;
@@ -8,11 +8,11 @@ public class Results {
 	private double amountOrange;
 	private double amountCarrot;
 
-	public Results() {
+	public Result() {
 		super();
 	}
 
-	public Results(double amountBread, double amountMilk, double amountChicken, double amountChocolate,
+	public Result(double amountBread, double amountMilk, double amountChicken, double amountChocolate,
 			double amountOrange, double amountCarrot) {
 		super();
 		this.amountBread = amountBread;
@@ -73,7 +73,7 @@ public class Results {
 
 	@Override
 	public String toString() {
-		return "Results: [amountBread=" + amountBread + ", amountMilk=" + amountMilk + ", amountChicken=" + amountChicken
+		return "[amountBread=" + amountBread + ", amountMilk=" + amountMilk + ", amountChicken=" + amountChicken
 				+ ", amountChocolate=" + amountChocolate + ", amountOrange=" + amountOrange + ", amountCarrot="
 				+ amountCarrot + "]";
 	}
