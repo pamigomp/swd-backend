@@ -16,62 +16,58 @@ import org.apache.commons.math3.optim.linear.SimplexSolver;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 
 public class AprioriAlgorithm {
-	public static Result executeAprioriAlgorithm(InputData inputData, HashMap<Vitamin, Double> dailyDemandForVitamins) {
-		ArrayList<ObjectiveFunction> objectiveFunctions = inputData.getObjectiveFunctions();
+	public static Result executeAprioriAlgorithm(ArrayList<ObjectiveFunction> objectiveFunctions,
+			HashMap<Vitamin, Double> dailyDemandForVitamins, HashMap<Vitamin, Double> maxDailyDemandForVitamins,
+			HashMap<String, Product> products) {
+		Collection<LinearConstraint> constraints = createConstraints(dailyDemandForVitamins, maxDailyDemandForVitamins,
+				products);
 
-		Collection<LinearConstraint> constraints = createConstraints(dailyDemandForVitamins);
+		PointValuePair result = calculateFirstObjectiveFunction(objectiveFunctions, constraints, products);
 
-		PointValuePair result = method(objectiveFunctions, constraints);
-
-		Result results = new Result();
-		
+		Result results;
 		try {
-			double[] result2 = result.getPoint();
-			results.setAmountBread(result2[0]);
-			results.setAmountMilk(result2[1]);
-			results.setAmountChicken(result2[2]);
-			results.setAmountChocolate(result2[3]);
-			results.setAmountOrange(result2[4]);
-			results.setAmountCarrot(result2[5]);
+			double[] resultPoints = result.getPoint();
+			results = new Result(resultPoints);
 		} catch (NullPointerException e) {
 			throw new NoFeasibleSolutionException();
 		}
-		
+
 		return results;
 	}
 
-	private static PointValuePair method(ArrayList<ObjectiveFunction> objectiveFunctions,
-			Collection<LinearConstraint> constraints) {
+	private static PointValuePair calculateFirstObjectiveFunction(ArrayList<ObjectiveFunction> objectiveFunctions,
+			Collection<LinearConstraint> constraints, HashMap<String, Product> products) {
 		double[] coefficients;
 		LinearObjectiveFunction objFunc;
 		PointValuePair solution;
 
 		switch (objectiveFunctions.get(0).getValue()) {
 		case 1:
-			coefficients = new double[] { 0.6, 0.5, 1.2, 3.5, 0.5, 0.3 };
+			coefficients = Product.getPrices(products);
 			objFunc = new LinearObjectiveFunction(coefficients, 0);
 			solution = executeSimplexSolverAlgorithm(constraints, objFunc);
-			return method2(objectiveFunctions.get(1), objectiveFunctions.get(2), coefficients, constraints, solution);
+			return calculateSecondObjectiveFunction(objectiveFunctions.get(1), objectiveFunctions.get(2), coefficients,
+					constraints, solution, products);
 		case 2:
-			coefficients = new double[] { Mischievousness.LOW.value, Mischievousness.LOW.value,
-					Mischievousness.AVERAGE.value, Mischievousness.HIGH.value, Mischievousness.LOW.value,
-					Mischievousness.LOW.value };
+			coefficients = Product.getMischievousness(products);
 			objFunc = new LinearObjectiveFunction(coefficients, 0);
 			solution = executeSimplexSolverAlgorithm(constraints, objFunc);
-			return method2(objectiveFunctions.get(1), objectiveFunctions.get(2), coefficients, constraints, solution);
+			return calculateSecondObjectiveFunction(objectiveFunctions.get(1), objectiveFunctions.get(2), coefficients,
+					constraints, solution, products);
 		case 3:
-			coefficients = new double[] { 0.8071, 0.844, 2.9557, 3.438, 53.5081, 11.7604 };
+			coefficients = Product.getSumOfVitamins(products);
 			objFunc = new LinearObjectiveFunction(coefficients, 0);
 			solution = executeSimplexSolverAlgorithm(constraints, objFunc);
-			return method2(objectiveFunctions.get(1), objectiveFunctions.get(2), coefficients, constraints, solution);
+			return calculateSecondObjectiveFunction(objectiveFunctions.get(1), objectiveFunctions.get(2), coefficients,
+					constraints, solution, products);
 		default:
 			throw new IllegalArgumentException("Podana funkcja celu nie istnieje!");
 		}
 	}
 
-	private static PointValuePair method2(ObjectiveFunction objectiveFunctionSecond,
+	private static PointValuePair calculateSecondObjectiveFunction(ObjectiveFunction objectiveFunctionSecond,
 			ObjectiveFunction objectiveFunctionThird, double[] coefficients, Collection<LinearConstraint> constraints,
-			PointValuePair solution) {
+			PointValuePair solution, HashMap<String, Product> products) {
 		PointValuePair solutionSecond = null;
 
 		for (double epsilon = 1; epsilon <= 2; epsilon += 0.01) {
@@ -83,7 +79,7 @@ public class AprioriAlgorithm {
 
 			switch (objectiveFunctionSecond.getValue()) {
 			case 1:
-				coefficientsSecond = new double[] { 0.6, 0.5, 1.2, 3.5, 0.5, 0.3 };
+				coefficientsSecond = Product.getPrices(products);
 				objFunc = new LinearObjectiveFunction(coefficientsSecond, 0);
 				try {
 					solutionSecond = executeSimplexSolverAlgorithm(constraints, objFunc);
@@ -93,11 +89,10 @@ public class AprioriAlgorithm {
 							new LinearConstraint(coefficients, Relationship.LEQ, solution.getValue() * epsilon));
 					break;
 				}
-				return method3(objectiveFunctionThird, coefficientsSecond, constraints, solutionSecond);
+				return calculateThirdObjectiveFunction(objectiveFunctionThird, coefficientsSecond, constraints,
+						solutionSecond, products);
 			case 2:
-				coefficientsSecond = new double[] { Mischievousness.LOW.value, Mischievousness.LOW.value,
-						Mischievousness.AVERAGE.value, Mischievousness.HIGH.value, Mischievousness.LOW.value,
-						Mischievousness.LOW.value };
+				coefficientsSecond = Product.getMischievousness(products);
 				objFunc = new LinearObjectiveFunction(coefficientsSecond, 0);
 				try {
 					solutionSecond = executeSimplexSolverAlgorithm(constraints, objFunc);
@@ -107,9 +102,10 @@ public class AprioriAlgorithm {
 							new LinearConstraint(coefficients, Relationship.LEQ, solution.getValue() * epsilon));
 					break;
 				}
-				return method3(objectiveFunctionThird, coefficientsSecond, constraints, solutionSecond);
+				return calculateThirdObjectiveFunction(objectiveFunctionThird, coefficientsSecond, constraints,
+						solutionSecond, products);
 			case 3:
-				coefficientsSecond = new double[] { 0.8071, 0.844, 2.9557, 3.438, 53.5081, 11.7604 };
+				coefficientsSecond = Product.getSumOfVitamins(products);
 				objFunc = new LinearObjectiveFunction(coefficientsSecond, 0);
 				try {
 					solutionSecond = executeSimplexSolverAlgorithm(constraints, objFunc);
@@ -119,29 +115,31 @@ public class AprioriAlgorithm {
 							new LinearConstraint(coefficients, Relationship.LEQ, solution.getValue() * epsilon));
 					break;
 				}
-				return method3(objectiveFunctionThird, coefficientsSecond, constraints, solutionSecond);
+				return calculateThirdObjectiveFunction(objectiveFunctionThird, coefficientsSecond, constraints,
+						solutionSecond, products);
 			default:
 				throw new IllegalArgumentException("Podana funkcja celu nie istnieje!");
 			}
 
 		}
-		System.out.println("Nie ma wyniku 2.!");
+
 		return solutionSecond;
 	}
 
-	private static PointValuePair method3(ObjectiveFunction objectiveFunctionThird, double[] coefficients,
-			Collection<LinearConstraint> constraints, PointValuePair solution) {
+	private static PointValuePair calculateThirdObjectiveFunction(ObjectiveFunction objectiveFunctionThird,
+			double[] coefficients, Collection<LinearConstraint> constraints, PointValuePair solution,
+			HashMap<String, Product> products) {
 		PointValuePair solutionThird = null;
 
 		for (double epsilon = 1; epsilon <= 2; epsilon += 0.01) {
 			System.out.println("Drugi warunek ogr.: " + epsilon);
 			constraints.add(new LinearConstraint(coefficients, Relationship.LEQ, solution.getValue() * epsilon));
 			LinearObjectiveFunction objFunc;
-			double[] coefficientsSecond;
+			double[] coefficientsThird;
 			switch (objectiveFunctionThird.getValue()) {
 			case 1:
-				coefficientsSecond = new double[] { 0.6, 0.5, 1.2, 3.5, 0.5, 0.3 };
-				objFunc = new LinearObjectiveFunction(coefficientsSecond, 0);
+				coefficientsThird = Product.getPrices(products);
+				objFunc = new LinearObjectiveFunction(coefficientsThird, 0);
 				try {
 					solutionThird = executeSimplexSolverAlgorithm(constraints, objFunc);
 				} catch (NoFeasibleSolutionException e) {
@@ -152,10 +150,8 @@ public class AprioriAlgorithm {
 				}
 				return solutionThird;
 			case 2:
-				coefficientsSecond = new double[] { Mischievousness.LOW.value, Mischievousness.LOW.value,
-						Mischievousness.AVERAGE.value, Mischievousness.HIGH.value, Mischievousness.LOW.value,
-						Mischievousness.LOW.value };
-				objFunc = new LinearObjectiveFunction(coefficientsSecond, 0);
+				coefficientsThird = Product.getMischievousness(products);
+				objFunc = new LinearObjectiveFunction(coefficientsThird, 0);
 				try {
 					solutionThird = executeSimplexSolverAlgorithm(constraints, objFunc);
 				} catch (NoFeasibleSolutionException e) {
@@ -166,8 +162,8 @@ public class AprioriAlgorithm {
 				}
 				return solutionThird;
 			case 3:
-				coefficientsSecond = new double[] { 0.8071, 0.844, 2.9557, 3.438, 53.5081, 11.7604 };
-				objFunc = new LinearObjectiveFunction(coefficientsSecond, 0);
+				coefficientsThird = Product.getSumOfVitamins(products);
+				objFunc = new LinearObjectiveFunction(coefficientsThird, 0);
 				try {
 					solutionThird = executeSimplexSolverAlgorithm(constraints, objFunc);
 				} catch (NoFeasibleSolutionException e) {
@@ -180,9 +176,8 @@ public class AprioriAlgorithm {
 			default:
 				throw new IllegalArgumentException("Podana funkcja celu nie istnieje!");
 			}
-
 		}
-		System.out.println("Nie ma wyniku 3.!");
+
 		return solutionThird;
 	}
 
@@ -194,17 +189,47 @@ public class AprioriAlgorithm {
 	 *            demand for each vitamin)
 	 * @return linear constraints
 	 */
-	private static Collection<LinearConstraint> createConstraints(HashMap<Vitamin, Double> dailyDemandForVitamins) {
+	private static Collection<LinearConstraint> createConstraints(HashMap<Vitamin, Double> dailyDemandForVitamins,
+			HashMap<Vitamin, Double> maxDailyDemandForVitamins, HashMap<String, Product> products) {
 		Collection<LinearConstraint> constraints = new ArrayList<LinearConstraint>();
 
-		constraints.add(new LinearConstraint(new double[] { 0.0021, 0.576, 0.0157, 0.053, 0.0681, 5.0624 },
-				Relationship.GEQ, dailyDemandForVitamins.get(Vitamin.A)));
-		constraints.add(new LinearConstraint(new double[] { 0.075, 0.038, 0.43, 0.045, 0.06, 0.138 }, Relationship.GEQ,
-				dailyDemandForVitamins.get(Vitamin.B6)));
-		constraints.add(new LinearConstraint(new double[] { 0.4, 0.2, 2.3, 0.2, 53.2, 5.9 }, Relationship.GEQ,
-				dailyDemandForVitamins.get(Vitamin.C)));
-		constraints.add(new LinearConstraint(new double[] { 0.33, 0.03, 0.21, 3.14, 0.18, 0.66 }, Relationship.GEQ,
+		// Constraints - sum of vitamins must be greater than daily demand
+		constraints.add(new LinearConstraint(Product.getVitamins(products, "A"), Relationship.GEQ,
+				dailyDemandForVitamins.get(Vitamin.A)));
+		constraints.add(new LinearConstraint(Product.getVitamins(products, "D"), Relationship.GEQ,
+				dailyDemandForVitamins.get(Vitamin.D)));
+		constraints.add(new LinearConstraint(Product.getVitamins(products, "E"), Relationship.GEQ,
 				dailyDemandForVitamins.get(Vitamin.E)));
+		constraints.add(new LinearConstraint(Product.getVitamins(products, "K"), Relationship.GEQ,
+				dailyDemandForVitamins.get(Vitamin.K)));
+		constraints.add(new LinearConstraint(Product.getVitamins(products, "B1"), Relationship.GEQ,
+				dailyDemandForVitamins.get(Vitamin.B1)));
+		constraints.add(new LinearConstraint(Product.getVitamins(products, "B2"), Relationship.GEQ,
+				dailyDemandForVitamins.get(Vitamin.B2)));
+		constraints.add(new LinearConstraint(Product.getVitamins(products, "B6"), Relationship.GEQ,
+				dailyDemandForVitamins.get(Vitamin.B6)));
+		constraints.add(new LinearConstraint(Product.getVitamins(products, "B12"), Relationship.GEQ,
+				dailyDemandForVitamins.get(Vitamin.B12)));
+		constraints.add(new LinearConstraint(Product.getVitamins(products, "C"), Relationship.GEQ,
+				dailyDemandForVitamins.get(Vitamin.C)));
+		constraints.add(new LinearConstraint(Product.getVitamins(products, "PP"), Relationship.GEQ,
+				dailyDemandForVitamins.get(Vitamin.PP)));
+
+		// Constraints - sum of vitamins must be lower than max daily demand
+		// constraints.add(new LinearConstraint(Product.getVitamins(products,
+		// "A"), Relationship.LEQ,
+		// maxDailyDemandForVitamins.get(Vitamin.A)));
+		constraints.add(new LinearConstraint(Product.getVitamins(products, "D"), Relationship.LEQ,
+				maxDailyDemandForVitamins.get(Vitamin.D)));
+		constraints.add(new LinearConstraint(Product.getVitamins(products, "E"), Relationship.LEQ,
+				maxDailyDemandForVitamins.get(Vitamin.E)));
+		constraints.add(new LinearConstraint(Product.getVitamins(products, "B6"), Relationship.LEQ,
+				maxDailyDemandForVitamins.get(Vitamin.B6)));
+		constraints.add(new LinearConstraint(Product.getVitamins(products, "C"), Relationship.LEQ,
+				maxDailyDemandForVitamins.get(Vitamin.C)));
+		constraints.add(new LinearConstraint(Product.getVitamins(products, "PP"), Relationship.LEQ,
+				maxDailyDemandForVitamins.get(Vitamin.PP)));
+
 		constraints.add(new LinearConstraint(new double[] { 1, 1, 1, 1, 1, 1 }, Relationship.GEQ, 0));
 
 		return constraints;

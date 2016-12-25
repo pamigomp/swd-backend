@@ -15,13 +15,85 @@ public class InputData {
 	private PhysicalActivity physicalActivity;
 	private ArrayList<ObjectiveFunction> objectiveFunctions;
 	private double dailyDemandVitaminA;
-	private double dailyDemandVitaminB6;
-	private double dailyDemandVitaminC;
+	private double dailyDemandVitaminD;
 	private double dailyDemandVitaminE;
+	private double dailyDemandVitaminK;
+	private double dailyDemandVitaminB1;
+	private double dailyDemandVitaminB2;
+	private double dailyDemandVitaminB6;
+	private double dailyDemandVitaminB12;
+	private double dailyDemandVitaminC;
+	private double dailyDemandVitaminPP;
 	private double maxDailyDemandVitaminA;
+	private double maxDailyDemandVitaminD;
+	private double maxDailyDemandVitaminE;
 	private double maxDailyDemandVitaminB6;
 	private double maxDailyDemandVitaminC;
-	private double maxDailyDemandVitaminE;
+	private double maxDailyDemandVitaminPP;
+
+	public double getDailyDemandVitaminD() {
+		return dailyDemandVitaminD;
+	}
+
+	public void setDailyDemandVitaminD(double dailyDemandVitaminD) {
+		this.dailyDemandVitaminD = dailyDemandVitaminD;
+	}
+
+	public double getDailyDemandVitaminK() {
+		return dailyDemandVitaminK;
+	}
+
+	public void setDailyDemandVitaminK(double dailyDemandVitaminK) {
+		this.dailyDemandVitaminK = dailyDemandVitaminK;
+	}
+
+	public double getDailyDemandVitaminB1() {
+		return dailyDemandVitaminB1;
+	}
+
+	public void setDailyDemandVitaminB1(double dailyDemandVitaminB1) {
+		this.dailyDemandVitaminB1 = dailyDemandVitaminB1;
+	}
+
+	public double getDailyDemandVitaminB2() {
+		return dailyDemandVitaminB2;
+	}
+
+	public void setDailyDemandVitaminB2(double dailyDemandVitaminB2) {
+		this.dailyDemandVitaminB2 = dailyDemandVitaminB2;
+	}
+
+	public double getDailyDemandVitaminB12() {
+		return dailyDemandVitaminB12;
+	}
+
+	public void setDailyDemandVitaminB12(double dailyDemandVitaminB12) {
+		this.dailyDemandVitaminB12 = dailyDemandVitaminB12;
+	}
+
+	public double getDailyDemandVitaminPP() {
+		return dailyDemandVitaminPP;
+	}
+
+	public void setDailyDemandVitaminPP(double dailyDemandVitaminPP) {
+		this.dailyDemandVitaminPP = dailyDemandVitaminPP;
+	}
+
+	public double getMaxDailyDemandVitaminD() {
+		return maxDailyDemandVitaminD;
+	}
+
+	public void setMaxDailyDemandVitaminD(double maxDailyDemandVitaminD) {
+		this.maxDailyDemandVitaminD = maxDailyDemandVitaminD;
+	}
+
+	public double getMaxDailyDemandVitaminPP() {
+		return maxDailyDemandVitaminPP;
+	}
+
+	public void setMaxDailyDemandVitaminPP(double maxDailyDemandVitaminPP) {
+		this.maxDailyDemandVitaminPP = maxDailyDemandVitaminPP;
+	}
 
 	public int getAge() {
 		return age;
@@ -136,7 +208,7 @@ public class InputData {
 	 * @throws IOException
 	 */
 	public void getDailyDemandForVitamins(InputData inputData) throws IOException {
-		List<String[]> amounOfVitamins = getDataFromCSVFile();
+		List<String[]> amounOfVitamins = getDataFromCSVFile("./dane.csv");
 		char male = 'M';
 		char female = 'K';
 
@@ -219,14 +291,14 @@ public class InputData {
 	 * @return parsed csv file
 	 * @throws IOException
 	 */
-	private static List<String[]> getDataFromCSVFile() throws IOException {
-		List<String[]> amountOfVitamins = new ArrayList<String[]>();
+	private static List<String[]> getDataFromCSVFile(String fileName) throws IOException {
+		List<String[]> data = new ArrayList<String[]>();
 
-		CSVReader reader = new CSVReader(new FileReader("./dane.csv"), ';');
-		amountOfVitamins = reader.readAll();
+		CSVReader reader = new CSVReader(new FileReader(fileName), ';');
+		data = reader.readAll();
 		reader.close();
 
-		return amountOfVitamins;
+		return data;
 	}
 
 	/**
@@ -263,10 +335,17 @@ public class InputData {
 		inputData.setMaxDailyDemandVitaminC(Double.parseDouble(row[8]));
 		inputData.setDailyDemandVitaminE(Double.parseDouble(row[9]));
 		inputData.setMaxDailyDemandVitaminE(Double.parseDouble(row[10]));
+		inputData.setDailyDemandVitaminD(Double.parseDouble(row[11]));
+		inputData.setMaxDailyDemandVitaminD(Double.parseDouble(row[12]));
+		inputData.setDailyDemandVitaminK(Double.parseDouble(row[13]));
+		inputData.setDailyDemandVitaminB1(Double.parseDouble(row[14]));
+		inputData.setDailyDemandVitaminB2(Double.parseDouble(row[15]));
+		inputData.setDailyDemandVitaminB12(Double.parseDouble(row[16]));
+		inputData.setDailyDemandVitaminPP(Double.parseDouble(row[17]));
+		inputData.setMaxDailyDemandVitaminPP(Double.parseDouble(row[18]));
 
 		return inputData;
 	}
-	
 
 	/**
 	 * Method for calculating daily demand for vitamins based on value of
@@ -282,32 +361,76 @@ public class InputData {
 		switch (inputData.getPhysicalActivity()) {
 		case NONE:
 			dailyDemandForVitamins.put(Vitamin.A, inputData.getDailyDemandVitaminA());
-			dailyDemandForVitamins.put(Vitamin.B6, inputData.getDailyDemandVitaminB6());
-			dailyDemandForVitamins.put(Vitamin.C, inputData.getDailyDemandVitaminC());
+			dailyDemandForVitamins.put(Vitamin.D, inputData.getDailyDemandVitaminD());
 			dailyDemandForVitamins.put(Vitamin.E, inputData.getDailyDemandVitaminE());
+			dailyDemandForVitamins.put(Vitamin.K, inputData.getDailyDemandVitaminK());
+			dailyDemandForVitamins.put(Vitamin.B1, inputData.getDailyDemandVitaminB1());
+			dailyDemandForVitamins.put(Vitamin.B2, inputData.getDailyDemandVitaminB2());
+			dailyDemandForVitamins.put(Vitamin.B6, inputData.getDailyDemandVitaminB6());
+			dailyDemandForVitamins.put(Vitamin.B12, inputData.getDailyDemandVitaminB12());
+			dailyDemandForVitamins.put(Vitamin.PP, inputData.getDailyDemandVitaminPP());
+			dailyDemandForVitamins.put(Vitamin.C, inputData.getDailyDemandVitaminC());
 			break;
 		case LOW:
-			dailyDemandForVitamins.put(Vitamin.A, inputData.getDailyDemandVitaminA()*1.5);
-			dailyDemandForVitamins.put(Vitamin.B6, inputData.getDailyDemandVitaminB6()*1.5);
-			dailyDemandForVitamins.put(Vitamin.C, inputData.getDailyDemandVitaminC()*1.5);
-			dailyDemandForVitamins.put(Vitamin.E, inputData.getDailyDemandVitaminE()*1.5);
+			dailyDemandForVitamins.put(Vitamin.A, inputData.getDailyDemandVitaminA() * 1.125);
+			dailyDemandForVitamins.put(Vitamin.D, inputData.getDailyDemandVitaminD() * 1.5);
+			dailyDemandForVitamins.put(Vitamin.E, inputData.getDailyDemandVitaminE() * 1.5);
+			dailyDemandForVitamins.put(Vitamin.K, inputData.getDailyDemandVitaminK() * 1.5);
+			dailyDemandForVitamins.put(Vitamin.B1, inputData.getDailyDemandVitaminB1() * 1.5);
+			dailyDemandForVitamins.put(Vitamin.B2, inputData.getDailyDemandVitaminB2() * 1.5);
+			dailyDemandForVitamins.put(Vitamin.B6, inputData.getDailyDemandVitaminB6() * 1.5);
+			dailyDemandForVitamins.put(Vitamin.B12, inputData.getDailyDemandVitaminB12() * 1.5);
+			dailyDemandForVitamins.put(Vitamin.PP, inputData.getDailyDemandVitaminPP() * 1.125);
+			dailyDemandForVitamins.put(Vitamin.C, inputData.getDailyDemandVitaminC() * 1.5);
 			break;
 		case AVERAGE:
-			dailyDemandForVitamins.put(Vitamin.A, inputData.getDailyDemandVitaminA()*3);
-			dailyDemandForVitamins.put(Vitamin.B6, inputData.getDailyDemandVitaminB6()*3);
-			dailyDemandForVitamins.put(Vitamin.C, inputData.getDailyDemandVitaminC()*3);
-			dailyDemandForVitamins.put(Vitamin.E, inputData.getDailyDemandVitaminE()*3);
+			dailyDemandForVitamins.put(Vitamin.A, inputData.getDailyDemandVitaminA() * 1.25);
+			dailyDemandForVitamins.put(Vitamin.D, inputData.getDailyDemandVitaminD() * 2);
+			dailyDemandForVitamins.put(Vitamin.E, inputData.getDailyDemandVitaminE() * 3);
+			dailyDemandForVitamins.put(Vitamin.K, inputData.getDailyDemandVitaminK() * 3);
+			dailyDemandForVitamins.put(Vitamin.B1, inputData.getDailyDemandVitaminB1() * 3);
+			dailyDemandForVitamins.put(Vitamin.B2, inputData.getDailyDemandVitaminB2() * 3);
+			dailyDemandForVitamins.put(Vitamin.B6, inputData.getDailyDemandVitaminB6() * 3);
+			dailyDemandForVitamins.put(Vitamin.B12, inputData.getDailyDemandVitaminB12() * 3);
+			dailyDemandForVitamins.put(Vitamin.PP, inputData.getDailyDemandVitaminPP() * 1.25);
+			dailyDemandForVitamins.put(Vitamin.C, inputData.getDailyDemandVitaminC() * 3);
 			break;
 		case HIGH:
-			dailyDemandForVitamins.put(Vitamin.A, inputData.getDailyDemandVitaminA()*4);
-			dailyDemandForVitamins.put(Vitamin.B6, inputData.getDailyDemandVitaminB6()*4);
-			dailyDemandForVitamins.put(Vitamin.C, inputData.getDailyDemandVitaminC()*4);
-			dailyDemandForVitamins.put(Vitamin.E, inputData.getDailyDemandVitaminE()*4);
+			dailyDemandForVitamins.put(Vitamin.A, inputData.getDailyDemandVitaminA() * 1.5);
+			dailyDemandForVitamins.put(Vitamin.D, inputData.getDailyDemandVitaminD() * 3);
+			dailyDemandForVitamins.put(Vitamin.E, inputData.getDailyDemandVitaminE() * 4);
+			dailyDemandForVitamins.put(Vitamin.K, inputData.getDailyDemandVitaminK() * 4);
+			dailyDemandForVitamins.put(Vitamin.B1, inputData.getDailyDemandVitaminB1() * 4);
+			dailyDemandForVitamins.put(Vitamin.B2, inputData.getDailyDemandVitaminB2() * 4);
+			dailyDemandForVitamins.put(Vitamin.B6, inputData.getDailyDemandVitaminB6() * 4);
+			dailyDemandForVitamins.put(Vitamin.B12, inputData.getDailyDemandVitaminB12() * 4);
+			dailyDemandForVitamins.put(Vitamin.PP, inputData.getDailyDemandVitaminPP() * 1.5);
+			dailyDemandForVitamins.put(Vitamin.C, inputData.getDailyDemandVitaminC() * 4);
 			break;
 		default:
 			throw new IllegalArgumentException("Nieprawidlowy poziom aktywnosci fizycznej!");
 		}
 
 		return dailyDemandForVitamins;
+	}
+
+	/**
+	 * Method for creating map with max daily demand for each vitamin
+	 * 
+	 * @param inputData
+	 *            - the set of input data
+	 * @return map with max daily demand for each vitamin
+	 */
+	public HashMap<Vitamin, Double> calculateMaxDailyDemandForVitaminsBaseOnPhysicalActivity(InputData inputData) {
+		HashMap<Vitamin, Double> maxDailyDemandForVitamins = new HashMap<Vitamin, Double>();
+
+		maxDailyDemandForVitamins.put(Vitamin.A, inputData.getMaxDailyDemandVitaminA());
+		maxDailyDemandForVitamins.put(Vitamin.D, inputData.getMaxDailyDemandVitaminD());
+		maxDailyDemandForVitamins.put(Vitamin.E, inputData.getMaxDailyDemandVitaminE());
+		maxDailyDemandForVitamins.put(Vitamin.B6, inputData.getMaxDailyDemandVitaminB6());
+		maxDailyDemandForVitamins.put(Vitamin.PP, inputData.getMaxDailyDemandVitaminPP());
+		maxDailyDemandForVitamins.put(Vitamin.C, inputData.getMaxDailyDemandVitaminC());
+
+		return maxDailyDemandForVitamins;
 	}
 }

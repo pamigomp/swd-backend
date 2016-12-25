@@ -9,18 +9,15 @@ public class Result {
 	private double amountCarrot;
 
 	public Result() {
-		super();
 	}
 
-	public Result(double amountBread, double amountMilk, double amountChicken, double amountChocolate,
-			double amountOrange, double amountCarrot) {
-		super();
-		this.amountBread = amountBread;
-		this.amountMilk = amountMilk;
-		this.amountChicken = amountChicken;
-		this.amountChocolate = amountChocolate;
-		this.amountOrange = amountOrange;
-		this.amountCarrot = amountCarrot;
+	public Result(double[] results) {
+		this.amountBread = results[0];
+		this.amountMilk = results[1];
+		this.amountChicken = results[2];
+		this.amountChocolate = results[3];
+		this.amountOrange = results[4];
+		this.amountCarrot = results[5];
 	}
 
 	public double getAmountBread() {
