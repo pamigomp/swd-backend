@@ -12,11 +12,11 @@ public class Result {
 	}
 
 	public Result(double[] results) {
-		this.amountBread = results[0];
-		this.amountMilk = results[1];
-		this.amountChicken = results[2];
-		this.amountChocolate = results[3];
-		this.amountOrange = results[4];
+		this.amountBread = results[1];
+		this.amountMilk = results[2];
+		this.amountChicken = results[3];
+		this.amountChocolate = results[4];
+		this.amountOrange = results[0];
 		this.amountCarrot = results[5];
 	}
 
